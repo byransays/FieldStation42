@@ -24,7 +24,7 @@ DEFAULT_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 _registered_font_families: dict[str, str] = {}
 
 
-def resolve_font(font_path: str | None, pixel_size: int) -> QFont:
+def resolve_font(font_path: str | None, pixel_size: int, bold: bool = False) -> QFont:
     """
     StatusDisplayConfig.font is a TTF file path (matching the old Pillow
     ImageFont.truetype(path, size) semantics), but Qt's QFont constructor
@@ -48,6 +48,8 @@ def resolve_font(font_path: str | None, pixel_size: int) -> QFont:
 
     font = QFont(family)
     font.setPixelSize(pixel_size)
+    if bold:
+        font.setBold(True)
     return font
 
 
@@ -61,6 +63,7 @@ class StatusDisplayConfig(BaseModel):
     font_size: int = 40
     expansion_factor: float = 1.0
     font: str | None = None
+    bold: bool = False
     x_margin: float = 0.1
     y_margin: float = 0.1
     delay: float = 0.0
@@ -69,7 +72,7 @@ class StatusDisplayConfig(BaseModel):
 class StatusDisplay(object):
     def __init__(self, config: StatusDisplayConfig):
         self.config = config
-        self._font = resolve_font(self.config.font, self.config.font_size)
+        self._font = resolve_font(self.config.font, self.config.font_size, self.config.bold)
         self._string = ""
 
         self.time_since_change = 0
